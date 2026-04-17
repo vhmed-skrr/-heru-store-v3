@@ -2,8 +2,6 @@ import { getSettings } from '@/lib/data/settings';
 import { getCategories } from '@/lib/data/categories';
 import { getProducts } from '@/lib/data/products';
 import { getStoreReviews } from '@/lib/data/reviews';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { HeroSection } from '@/components/home/HeroSection';
 import { CategoriesSection } from '@/components/home/CategoriesSection';
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
@@ -27,7 +25,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <Navbar />
       <main className="flex-1 flex flex-col">
         <HeroSection settings={settings} />
         <CategoriesSection categories={categories} />
@@ -35,7 +32,6 @@ export default async function HomePage() {
         <OfferBanner settings={settings} />
         <StoreReviews reviews={storeReviews} />
       </main>
-      <Footer />
     </>
   );
 }

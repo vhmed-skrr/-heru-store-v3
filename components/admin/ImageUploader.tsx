@@ -17,7 +17,6 @@ export function ImageUploader({ maxImages = 9, value = [], onChange, bucket = 'p
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const supabase = createClient();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();

@@ -2,28 +2,35 @@ export interface Category {
   id: string;
   name_ar: string;
   name_en: string;
+  slug?: string | null;
   color: string | null;
   icon: string | null;
+  image: string | null;
   image_url: string | null;
   sort_order: number;
+  order_index?: number;
   active: boolean;
   created_at: string;
 }
 
 export interface Product {
   id: string;
+  slug?: string | null;
   name_ar: string;
   name_en: string;
   description_ar: string | null;
   description_en: string | null;
   price: number;
+  original_price?: number | null;
   stock: number;
   category_id: string | null;
   images: string[];
   attributes: Record<string, unknown>;
   featured: boolean;
+  is_new?: boolean;
   active: boolean;
   created_at: string;
+  updated_at?: string | null;
 }
 
 export interface OrderItem {

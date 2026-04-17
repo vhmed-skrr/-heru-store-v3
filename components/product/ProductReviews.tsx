@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Review } from '@/types';
-import { submitProductReview } from '@/lib/data/reviews';
+import { submitProductReview } from '@/lib/actions/submitReview';
 import { useToast } from '@/components/ui/Toast';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';

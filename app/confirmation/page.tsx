@@ -3,8 +3,6 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
@@ -55,13 +53,11 @@ function ConfirmationContent() {
 export default function ConfirmationPage() {
   return (
     <>
-      <Navbar />
       <main className="flex-1 bg-bg-secondary min-h-[80vh] flex items-center justify-center">
         <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 rounded-full border-4 border-brand-200 border-t-brand-600 animate-spin"></div></div>}>
           <ConfirmationContent />
         </Suspense>
       </main>
-      <Footer />
     </>
   );
 }

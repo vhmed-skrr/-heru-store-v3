@@ -4,8 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
 import { CheckoutForm } from '@/components/checkout/CheckoutForm';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -26,7 +24,6 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <Navbar />
       <main className="flex-1 bg-bg-secondary py-8 min-h-[80vh]">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-10 text-center md:text-right">
@@ -37,7 +34,6 @@ export default function CheckoutPage() {
           <CheckoutForm />
         </div>
       </main>
-      <Footer />
     </>
   );
 }

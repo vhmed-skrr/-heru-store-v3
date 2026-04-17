@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cart';
 import { CartItem } from '@/components/cart/CartItem';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 
@@ -25,7 +23,6 @@ export default function CartPage() {
 
   return (
     <>
-      <Navbar />
       <main className="flex-1 bg-background py-8 min-h-screen">
         <div className="container mx-auto px-4 max-w-5xl">
           <nav className="flex text-sm text-text-sec mb-6" aria-label="Breadcrumb">
@@ -107,7 +104,6 @@ export default function CartPage() {
           )}
         </div>
       </main>
-      <Footer />
     </>
   );
 }

@@ -8,7 +8,7 @@ const WINDOW_MS = 60 * 1000; // per minute
 export async function middleware(request: NextRequest) {
   // Simple Rate Limiting (Per serverless isolate)
   // Note: For global robust rate limiting on Vercel, it is recommended to use Vercel Edge Firewall features or Upstash Redis.
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'anonymous';
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'anonymous';
   const now = Date.now();
   
   const rateLimitInfo = rateLimitMap.get(ip);

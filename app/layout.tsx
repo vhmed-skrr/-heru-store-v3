@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { createClient } from "@/lib/supabase/server";
 import { ToastProvider } from "@/components/ui/Toast";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+
+// Force dynamic rendering because Navbar uses cookies() via getSettings()
+export const dynamic = "force-dynamic";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -25,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       .from("settings")
       .select("store_name")
       .single();
-      
+
     if (settings?.store_name) {
       storeName = settings.store_name;
     }
@@ -57,9 +63,14 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
       <body className="antialiased min-h-screen flex flex-col font-arabic">
-        <GoogleAnalytics />
+        {/* GoogleAnalytics uses useSearchParams — must be wrapped in Suspense */}
+        <Suspense fallback={null}>
+          <GoogleAnalytics />
+        </Suspense>
         <ToastProvider>
+          <Navbar />
           {children}
+          <Footer />
           <CartDrawer />
         </ToastProvider>
       </body>

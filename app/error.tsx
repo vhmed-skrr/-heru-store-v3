@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import * as Sentry from "@sentry/nextjs";
 
 export default function Error({
   error,
@@ -12,9 +11,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service if needed
+    // Log the error to the console for debugging
     console.error(error);
-    Sentry.captureException(error);
   }, [error]);
 
   return (
@@ -37,8 +35,8 @@ export default function Error({
         >
           حاول مرة أخرى
         </button>
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="bg-surface hover:bg-surface-hover text-text border border-border px-8 py-3 rounded-full font-medium transition-colors w-full sm:w-auto"
         >
           العودة للرئيسية

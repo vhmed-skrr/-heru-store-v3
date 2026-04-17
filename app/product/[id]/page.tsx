@@ -4,8 +4,6 @@ import { Metadata } from 'next';
 import { getProductById, getAllProductIds, getRelatedProducts } from '@/lib/data/products';
 import { getProductReviews } from '@/lib/data/reviews';
 import { getSettings } from '@/lib/data/settings';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { QuickBuyButton } from '@/components/product/QuickBuyButton';
 import { ProductReviews } from '@/components/product/ProductReviews';
@@ -81,7 +79,6 @@ export default async function ProductPage(
 
   return (
     <>
-      <Navbar />
       <main className="flex-1 bg-background pt-8 pb-20">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Main Product Section */}
@@ -144,7 +141,6 @@ export default async function ProductPage(
           <ProductReviews product_id={product.id} initialReviews={reviews || []} />
         </div>
       </main>
-      <Footer />
     </>
   );
 }

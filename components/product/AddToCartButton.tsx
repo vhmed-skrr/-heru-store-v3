@@ -21,7 +21,7 @@ export function AddToCartButton({ product }: { product: Product }) {
       price: product.price,
       quantity: 1,
       image: product.images?.[0] || '',
-      slug: product.slug,
+      slug: product.slug ?? product.id,
     });
     
     toast("تمت الإضافة للسلة بنجاح", "success");
