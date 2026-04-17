@@ -1,5 +1,4 @@
-import { withSentryConfig } from '@sentry/nextjs';
-import type { NextConfig } from 'next'
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   compress: true,
@@ -33,12 +32,8 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-    ]
+    ];
   },
-}
+};
 
-export default withSentryConfig(nextConfig, {
-  silent: true,
-  org: "heru-store",
-  project: "heru-store-v3",
-});
+export default nextConfig;
