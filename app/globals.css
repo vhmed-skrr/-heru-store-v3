@@ -1,0 +1,44 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@layer base {
+  :root {
+    --bg-main: #ffffff;
+    --bg-secondary: #f9fafb;
+    --text-main: #111827;
+    --text-sec: #6b7280;
+    --border-color: #e5e7eb;
+    
+    --brand-50: #f5f3ff;
+    --brand-600: #7c3aed;
+    --brand-700: #6d28d9;
+    
+    --orange-500: #f97316;
+    --success-500: #22c55e;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: var(--font-cairo), sans-serif;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary); 
+}
+::-webkit-scrollbar-thumb {
+  background: var(--brand-600); 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-700); 
+}
