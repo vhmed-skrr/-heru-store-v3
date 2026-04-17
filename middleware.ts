@@ -55,9 +55,22 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protect /admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user && request.nextUrl.pathname !== '/admin/login') {
+  // Allow the Supabase auth callback to pass through unconditionally.
+  // This route handles PKCE code exchange for email links (password reset, etc.)
+  // and must never be blocked or redirected.
+  if (request.nextUrl.pathname.startsWith('/auth/callback')) {
+    return supabaseResponse
+  }
+
+  // Protect /admin routes (all pages except /login and /update-password).
+  // /update-password is reachable only after a valid PKCE session is established
+  // by /auth/callback, so it is safe to leave unguarded here.
+  const unguardedAdminPaths = ['/admin/login', '/admin/update-password']
+  if (
+    request.nextUrl.pathname.startsWith('/admin') &&
+    !unguardedAdminPaths.includes(request.nextUrl.pathname)
+  ) {
+    if (!user) {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
       return NextResponse.redirect(url)
