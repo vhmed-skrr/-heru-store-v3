@@ -19,32 +19,41 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
+  /**
+   * is_new is REMOVED from form state.
+   * WHY: The `is_new` column does not exist in the products DB schema.
+   * Sending it caused: "Could not find the 'is_new' column of 'products'"
+   *
+   * New badge logic is now derived from created_at:
+   *   isNew = created_at is within the last 7 days (client-side display only)
+   */
   const [formData, setFormData] = useState({
-    name_ar: initialData?.name_ar || '',
-    name_en: initialData?.name_en || '',
+    name_ar:        initialData?.name_ar        || '',
+    name_en:        initialData?.name_en        || '',
     description_ar: initialData?.description_ar || '',
-    price: initialData?.price?.toString() || '',
+    price:          initialData?.price?.toString()          || '',
     original_price: initialData?.original_price?.toString() || '',
-    stock: initialData?.stock?.toString() || '0',
-    category_id: typeof initialData?.category_id === 'object' ? (initialData.category_id as any).id : (initialData?.category_id || ''),
-    featured: initialData?.featured || false,
-    active: initialData !== undefined ? initialData.active : true,
-    is_new: initialData?.is_new || false,
-    images: initialData?.images || []
+    stock:          initialData?.stock?.toString()          || '0',
+    category_id:    typeof initialData?.category_id === 'object'
+                      ? (initialData.category_id as any).id
+                      : (initialData?.category_id || ''),
+    featured: initialData?.featured ?? false,
+    active:   initialData !== undefined ? initialData.active : true,
+    images:   initialData?.images || [],
   });
 
   const categoryOptions = [
     { value: '', label: 'اختر تصنيفاً' },
-    ...categories.map(c => ({ value: c.id, label: c.name_ar }))
+    ...categories.map(c => ({ value: c.id, label: c.name_ar })),
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
-    
     if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
+      setFormData(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -56,40 +65,47 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name_ar.trim()) return toast("الاسم العربي مطلوب", "error");
-    if (!formData.price || Number(formData.price) <= 0) return toast("السعر غير صحيح", "error");
-    if (!formData.category_id) return toast("التصنيف مطلوب", "error");
-    if (formData.images.length === 0) return toast("يجب رفع صورة واحدة على الأقل", "error");
+
+    if (!formData.name_ar.trim())  return toast('الاسم العربي مطلوب', 'error');
+    if (!formData.price || Number(formData.price) <= 0) return toast('السعر غير صحيح', 'error');
+    if (!formData.category_id)     return toast('التصنيف مطلوب', 'error');
+    if (formData.images.length === 0) return toast('يجب رفع صورة واحدة على الأقل', 'error');
 
     setIsSubmitting(true);
 
-    const price = parseFloat(formData.price);
+    const price          = parseFloat(formData.price);
     const original_price = formData.original_price ? parseFloat(formData.original_price) : undefined;
-    const stock = parseInt(formData.stock) || 0;
+    const stock          = parseInt(formData.stock) || 0;
 
+    /**
+     * Build the payload explicitly.
+     * is_new is EXCLUDED — it caused a schema cache error.
+     * original_price is included as optional (it exists in the DB if you ran
+     * the migration in the SQL section; if not, Supabase will ignore it).
+     */
     const payload: Partial<Product> = {
-      ...initialData,
-      name_ar: formData.name_ar,
-      name_en: formData.name_en || undefined,
-      description_ar: formData.description_ar,
+      ...(initialData?.id ? { id: initialData.id } : {}),
+      name_ar:        formData.name_ar,
+      name_en:        formData.name_en || undefined,
+      description_ar: formData.description_ar || undefined,
       price,
-      original_price: original_price && original_price > price ? original_price : undefined,
       stock,
-      category_id: formData.category_id,
-      featured: formData.featured,
-      active: formData.active,
-      is_new: formData.is_new,
-      images: formData.images
+      category_id:    formData.category_id,
+      featured:       formData.featured,
+      active:         formData.active,
+      images:         formData.images,
+      // Only include original_price if it's greater than current price (makes logical sense)
+      ...(original_price && original_price > price ? { original_price } : {}),
+      // NOTE: is_new intentionally omitted — use created_at-based logic instead
     };
 
     const { success, error } = await upsertProduct(payload);
 
     if (success) {
-      toast("تم حفظ المنتج بنجاح", "success");
+      toast('تم حفظ المنتج بنجاح', 'success');
       router.push('/admin/products');
     } else {
-      toast(`حدث خطأ: ${error}`, "error");
+      toast(`حدث خطأ: ${error}`, 'error');
     }
 
     setIsSubmitting(false);
@@ -98,20 +114,8 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-8 bg-white p-6 md:p-8 rounded-2xl border border-border shadow-sm">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Input 
-          label="اسم المنتج (عربي) *" 
-          name="name_ar" 
-          value={formData.name_ar} 
-          onChange={handleChange} 
-          required 
-        />
-        <Input 
-          label="اسم المنتج (إنجليزي)" 
-          name="name_en" 
-          value={formData.name_en} 
-          onChange={handleChange} 
-          dir="ltr"
-        />
+        <Input label="اسم المنتج (عربي) *" name="name_ar" value={formData.name_ar} onChange={handleChange} required />
+        <Input label="اسم المنتج (إنجليزي)" name="name_en" value={formData.name_en} onChange={handleChange} dir="ltr" />
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -126,51 +130,17 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Input 
-          label="السعر الحالي *" 
-          name="price" 
-          type="number"
-          min="1"
-          step="0.01"
-          value={formData.price} 
-          onChange={handleChange} 
-          required 
-          dir="ltr"
-        />
-        <Input 
-          label="السعر قبل الخصم" 
-          name="original_price" 
-          type="number"
-          min="1"
-          step="0.01"
-          value={formData.original_price} 
-          onChange={handleChange} 
-          dir="ltr"
-        />
-        <Input 
-          label="الكمية في المخزون *" 
-          name="stock" 
-          type="number"
-          min="0"
-          value={formData.stock} 
-          onChange={handleChange} 
-          required 
-          dir="ltr"
-        />
+        <Input label="السعر الحالي *"     name="price"          type="number" min="1"   step="0.01" value={formData.price}          onChange={handleChange} required dir="ltr" />
+        <Input label="السعر قبل الخصم"   name="original_price" type="number" min="1"   step="0.01" value={formData.original_price}  onChange={handleChange}         dir="ltr" />
+        <Input label="الكمية في المخزون *" name="stock"          type="number" min="0"              value={formData.stock}           onChange={handleChange} required dir="ltr" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Select 
-          label="التصنيف *"
-          name="category_id"
-          value={formData.category_id}
-          onChange={handleChange}
-          options={categoryOptions}
-        />
+        <Select label="التصنيف *" name="category_id" value={formData.category_id} onChange={handleChange} options={categoryOptions} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-text-main">صور المنتج (حد أقصى 9، يرجى اختيار صور جذابة)</label>
+        <label className="text-sm font-semibold text-text-main">صور المنتج (حد أقصى 9)</label>
         <ImageUploader value={formData.images} onChange={handleImagesChange} maxImages={9} bucket="product-images" />
       </div>
 
@@ -183,19 +153,20 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
           <input type="checkbox" name="featured" checked={formData.featured} onChange={handleChange} className="w-5 h-5 text-brand-600 rounded border-gray-300 focus:ring-brand-600" />
           <span className="font-medium text-text-main">مميز (يظهر بالرئيسية)</span>
         </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="is_new" checked={formData.is_new} onChange={handleChange} className="w-5 h-5 text-brand-600 rounded border-gray-300 focus:ring-brand-600" />
-          <span className="font-medium text-text-main">علامة "جديد"</span>
-        </label>
+        {/*
+          is_new REMOVED — column does not exist in the products table.
+          "جديد" badge is now automatically determined from created_at:
+          products added within the last 7 days show a "جديد" badge automatically.
+        */}
+        <div className="flex items-center gap-2 text-sm text-text-sec bg-brand-50 px-3 py-2 rounded-lg border border-brand-100">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-600 shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>علامة "جديد" تظهر تلقائياً للمنتجات المضافة خلال آخر 7 أيام من تاريخ الإضافة</span>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 mt-4">
-        <Button type="submit" loading={isSubmitting} size="lg" className="px-10">
-          حفظ المنتج
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting} size="lg">
-          إلغاء
-        </Button>
+        <Button type="submit" loading={isSubmitting} size="lg" className="px-10">حفظ المنتج</Button>
+        <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting} size="lg">إلغاء</Button>
       </div>
     </form>
   );

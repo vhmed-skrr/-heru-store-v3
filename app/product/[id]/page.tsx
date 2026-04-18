@@ -72,6 +72,13 @@ export default async function ProductPage(
   ]);
 
   const isSale = product.original_price && product.original_price > product.price;
+  /**
+   * isNew — derived from created_at (7-day window).
+   * is_new column does not exist in the products schema.
+   */
+  const isNew = product.created_at
+    ? new Date(product.created_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+    : false;
   let percentage = '';
   if (isSale) {
     percentage = Math.round(((product.original_price! - product.price) / product.original_price!) * 100).toString() + '%';
@@ -99,7 +106,7 @@ export default async function ProductPage(
                 {isSale && (
                   <Badge variant="sale" percentage={percentage} />
                 )}
-                {product.is_new && !isSale && (
+                {isNew && !isSale && (
                   <Badge variant="new">جديد</Badge>
                 )}
                 
