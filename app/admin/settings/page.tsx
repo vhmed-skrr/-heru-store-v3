@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { saveSettings } from '@/lib/actions/adminSettings';
 import { Setting } from '@/types';
+import { ImageUploader } from '@/components/admin/ImageUploader';
 
 interface SettingsFormData {
   store_name:          string;
@@ -46,6 +47,19 @@ interface SettingsFormData {
   logo_value:          string;
   logo_height:         number;
   store_accent_color:  string;
+
+  // New Hero Settings
+  hero_main_image:     string;
+  hero_card1_title:    string;
+  hero_card1_subtitle: string;
+  hero_card1_image:    string;
+  hero_card1_bg:       string;
+  hero_card1_link:     string;
+  hero_card2_title:    string;
+  hero_card2_subtitle: string;
+  hero_card2_image:    string;
+  hero_card2_bg:       string;
+  hero_card2_link:     string;
 }
 
 const DEFAULT_FORM: SettingsFormData = {
@@ -67,6 +81,18 @@ const DEFAULT_FORM: SettingsFormData = {
   logo_value:          '',
   logo_height:         40,
   store_accent_color:  '#7c3aed',
+
+  hero_main_image:     '',
+  hero_card1_title:    '',
+  hero_card1_subtitle: '',
+  hero_card1_image:    '',
+  hero_card1_bg:       '#7c3aed',
+  hero_card1_link:     '',
+  hero_card2_title:    '',
+  hero_card2_subtitle: '',
+  hero_card2_image:    '',
+  hero_card2_bg:       '#6d28d9',
+  hero_card2_link:     '',
 };
 
 export default function AdminSettingsPage() {
@@ -125,6 +151,18 @@ export default function AdminSettingsPage() {
           if (typeof settingsMap.logo_type           === 'string')  next.logo_type           = settingsMap.logo_type;
           if (typeof settingsMap.logo_value          === 'string')  next.logo_value          = settingsMap.logo_value;
           if (typeof settingsMap.store_accent_color  === 'string')  next.store_accent_color  = settingsMap.store_accent_color;
+
+          if (typeof settingsMap.hero_main_image     === 'string')  next.hero_main_image     = settingsMap.hero_main_image;
+          if (typeof settingsMap.hero_card1_title    === 'string')  next.hero_card1_title    = settingsMap.hero_card1_title;
+          if (typeof settingsMap.hero_card1_subtitle === 'string')  next.hero_card1_subtitle = settingsMap.hero_card1_subtitle;
+          if (typeof settingsMap.hero_card1_image    === 'string')  next.hero_card1_image    = settingsMap.hero_card1_image;
+          if (typeof settingsMap.hero_card1_bg       === 'string')  next.hero_card1_bg       = settingsMap.hero_card1_bg;
+          if (typeof settingsMap.hero_card1_link     === 'string')  next.hero_card1_link     = settingsMap.hero_card1_link;
+          if (typeof settingsMap.hero_card2_title    === 'string')  next.hero_card2_title    = settingsMap.hero_card2_title;
+          if (typeof settingsMap.hero_card2_subtitle === 'string')  next.hero_card2_subtitle = settingsMap.hero_card2_subtitle;
+          if (typeof settingsMap.hero_card2_image    === 'string')  next.hero_card2_image    = settingsMap.hero_card2_image;
+          if (typeof settingsMap.hero_card2_bg       === 'string')  next.hero_card2_bg       = settingsMap.hero_card2_bg;
+          if (typeof settingsMap.hero_card2_link     === 'string')  next.hero_card2_link     = settingsMap.hero_card2_link;
 
           // JSONB boolean — Supabase returns true/false natively
           if (typeof settingsMap.announcement_active === 'boolean') next.announcement_active = settingsMap.announcement_active;
@@ -257,6 +295,60 @@ export default function AdminSettingsPage() {
           <Input label="النص الفرعي للرسالة التعريفية" name="hero_subtitle" value={formData.hero_subtitle} onChange={handleChange} />
           <Input label="كلمة الزر الأساسي الموجه للشراء" name="hero_cta_primary" value={formData.hero_cta_primary} onChange={handleChange} placeholder="مثال: تسوق الآن" />
           <Input label="كلمة الزر الثانوي المجاور (اختياري)" name="hero_cta_secondary" value={formData.hero_cta_secondary} onChange={handleChange} placeholder="مثال: اقترح تصميم" />
+        </div>
+
+        {/* ── بطاقات الـ Hero والصور ─────────────────────────── */}
+        <div className="bg-white p-6 md:p-8 rounded-2xl border border-border shadow-sm flex flex-col gap-5 h-max lg:col-span-2">
+          <h2 className="text-lg font-bold border-b border-border pb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            صور وبطاقات القسم الرئيسي (Hero Cards)
+          </h2>
+          
+          <div className="space-y-4 border p-4 rounded-xl">
+            <h3 className="font-bold text-text-main">الصورة الرئيسية (Main Image)</h3>
+            <ImageUploader 
+              value={formData.hero_main_image ? [formData.hero_main_image] : []}
+              onChange={(urls) => setFormData(prev => ({ ...prev, hero_main_image: urls[0] || '' }))}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4 border p-4 rounded-xl">
+              <h3 className="font-bold text-text-main">البطاقة الأولى (Card 1)</h3>
+              <Input label="عنوان البطاقة" name="hero_card1_title" value={formData.hero_card1_title} onChange={handleChange} />
+              <Input label="وصف البطاقة" name="hero_card1_subtitle" value={formData.hero_card1_subtitle} onChange={handleChange} />
+              <Input label="رابط التوجيه" name="hero_card1_link" value={formData.hero_card1_link} onChange={handleChange} dir="ltr" />
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-text-main">لون خلفية البطاقة</label>
+                <div className="flex items-center gap-3">
+                  <input type="color" name="hero_card1_bg" value={formData.hero_card1_bg || '#7c3aed'} onChange={handleChange} className="w-12 h-12 p-0 border-0 rounded cursor-pointer shadow-sm" />
+                  <Input name="hero_card1_bg" value={formData.hero_card1_bg || '#7c3aed'} onChange={handleChange} dir="ltr" className="flex-1 font-mono uppercase" />
+                </div>
+              </div>
+              <ImageUploader 
+                value={formData.hero_card1_image ? [formData.hero_card1_image] : []}
+                onChange={(urls) => setFormData(prev => ({ ...prev, hero_card1_image: urls[0] || '' }))}
+              />
+            </div>
+
+            <div className="space-y-4 border p-4 rounded-xl">
+              <h3 className="font-bold text-text-main">البطاقة الثانية (Card 2)</h3>
+              <Input label="عنوان البطاقة" name="hero_card2_title" value={formData.hero_card2_title} onChange={handleChange} />
+              <Input label="وصف البطاقة" name="hero_card2_subtitle" value={formData.hero_card2_subtitle} onChange={handleChange} />
+              <Input label="رابط التوجيه" name="hero_card2_link" value={formData.hero_card2_link} onChange={handleChange} dir="ltr" />
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-text-main">لون خلفية البطاقة</label>
+                <div className="flex items-center gap-3">
+                  <input type="color" name="hero_card2_bg" value={formData.hero_card2_bg || '#6d28d9'} onChange={handleChange} className="w-12 h-12 p-0 border-0 rounded cursor-pointer shadow-sm" />
+                  <Input name="hero_card2_bg" value={formData.hero_card2_bg || '#6d28d9'} onChange={handleChange} dir="ltr" className="flex-1 font-mono uppercase" />
+                </div>
+              </div>
+              <ImageUploader 
+                value={formData.hero_card2_image ? [formData.hero_card2_image] : []}
+                onChange={(urls) => setFormData(prev => ({ ...prev, hero_card2_image: urls[0] || '' }))}
+              />
+            </div>
+          </div>
         </div>
 
         {/* ── شريط العروض ───────────────────────────────────── */}
