@@ -3,7 +3,12 @@
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useToast } from '@/components/ui/Toast';
-import { uploadProductImage, uploadCategoryImage, deleteImage } from '@/lib/storage';
+import {
+  uploadProductImage,
+  uploadCategoryImage,
+  uploadSuggestionImage,
+  deleteImage,
+} from '@/lib/storage';
 
 interface ImageUploaderProps {
   maxImages?: number;
@@ -12,17 +17,41 @@ interface ImageUploaderProps {
   bucket?: string;
 }
 
-export function ImageUploader({ maxImages = 9, value = [], onChange, bucket = 'product-images' }: ImageUploaderProps) {
+/**
+ * Selects the correct upload function based on the bucket prop.
+ *
+ * WHY this matters:
+ * `product-images` and `category-images` require authenticated users (admin) → RLS.
+ * `suggestions` uses a public bucket with a public INSERT policy → anonymous uploads OK.
+ *
+ * The old code only handled 2 cases (category-images / else→product-images).
+ * When bucket="suggestions", it fell through to uploadProductImage which tried to
+ * upload to product-images → RLS blocked anonymous suggest-page visitors.
+ */
+function getUploadFn(bucket: string) {
+  switch (bucket) {
+    case 'category-images':  return uploadCategoryImage;
+    case 'suggestions':      return uploadSuggestionImage;
+    default:                 return uploadProductImage;   // 'product-images'
+  }
+}
+
+export function ImageUploader({
+  maxImages = 9,
+  value = [],
+  onChange,
+  bucket = 'product-images',
+}: ImageUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
+  const [dragActive, setDragActive]   = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
-    else if (e.type === "dragleave" || e.type === "drop") setDragActive(false);
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave' || e.type === 'drop') setDragActive(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -43,20 +72,20 @@ export function ImageUploader({ maxImages = 9, value = [], onChange, bucket = 'p
 
   const processFiles = async (files: File[]) => {
     if (value.length + files.length > maxImages) {
-      toast(`يمكنك رفع ${maxImages} صور كحد أقصى`, "error");
+      toast(`يمكنك رفع ${maxImages} صور كحد أقصى`, 'error');
       return;
     }
 
-    const maxFileSize = bucket === 'category-images' ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
+    const maxFileSize  = bucket === 'category-images' ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
     const sizeErrorMsg = bucket === 'category-images' ? '2MB' : '5MB';
 
     const validFiles = files.filter(f => {
       if (f.size > maxFileSize) {
-        toast(`الملف ${f.name} يتجاوز الحجم المسموح (${sizeErrorMsg})`, "error");
+        toast(`الملف ${f.name} يتجاوز الحجم المسموح (${sizeErrorMsg})`, 'error');
         return false;
       }
       if (!f.type.startsWith('image/')) {
-        toast(`الملف ${f.name} ليس صورة صالحة`, "error");
+        toast(`الملف ${f.name} ليس صورة صالحة`, 'error');
         return false;
       }
       return true;
@@ -66,13 +95,12 @@ export function ImageUploader({ maxImages = 9, value = [], onChange, bucket = 'p
 
     setIsUploading(true);
     const uploadedUrls: string[] = [];
+    const uploadFn = getUploadFn(bucket);
 
     for (const file of validFiles) {
-      const uploadRoutine = bucket === 'category-images' ? uploadCategoryImage : uploadProductImage;
-      const { url, error } = await uploadRoutine(file);
-      
+      const { url, error } = await uploadFn(file);
       if (error || !url) {
-        toast(`فشل رفع الصورة: ${error}`, "error");
+        toast(`فشل رفع الصورة: ${error}`, 'error');
       } else {
         uploadedUrls.push(url);
       }
@@ -80,9 +108,9 @@ export function ImageUploader({ maxImages = 9, value = [], onChange, bucket = 'p
 
     if (uploadedUrls.length > 0) {
       onChange([...value, ...uploadedUrls]);
-      toast("تم رفع الصور بنجاح", "success");
+      toast('تم رفع الصور بنجاح', 'success');
     }
-    
+
     setIsUploading(false);
     if (inputRef.current) inputRef.current.value = '';
   };
@@ -92,8 +120,6 @@ export function ImageUploader({ maxImages = 9, value = [], onChange, bucket = 'p
     const newItems = [...value];
     newItems.splice(index, 1);
     onChange(newItems);
-
-    // Optional: Attempt to delete from bucket directly
     await deleteImage(urlToRemove);
   };
 
@@ -140,10 +166,10 @@ export function ImageUploader({ maxImages = 9, value = [], onChange, bucket = 'p
               <p className="text-xs">أو اضغط لاختيار الملفات (الحد الأقصى {maxImages} صور، 5MB للملف)</p>
             </div>
           )}
-          <input 
+          <input
             ref={inputRef}
-            type="file" 
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+            type="file"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
             multiple={maxImages > 1}
             accept="image/*"
             onChange={handleChange}

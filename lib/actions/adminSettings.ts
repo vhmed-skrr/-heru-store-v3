@@ -60,6 +60,8 @@ export async function saveSettings(settingsData: Record<string, unknown>) {
     if (error) throw error;
 
     revalidatePath('/');
+    revalidatePath('/shop');
+    revalidatePath('/product', 'layout'); // revalidates all /product/* pages
     revalidatePath('/admin/settings');
 
     return { success: true };

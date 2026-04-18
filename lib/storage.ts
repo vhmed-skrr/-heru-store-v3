@@ -4,17 +4,8 @@ import { createClient } from '@/lib/supabase/client';
  * Storage Upload Utilities
  *
  * WHY the client must be created INSIDE each function (not at module level):
- *
- * The old code did:
- *   const supabase = createClient()   ← module-level, runs at import time
- *
- * This causes an RLS error ("new row violates row-level security policy") because:
- *   1. The module is imported before the user's auth session is established.
- *   2. The singleton client captures the auth state at import time (no session).
- *   3. All subsequent upload calls use an anonymous client → storage RLS blocks them.
- *
- * Fix: call createClient() inside each function so it reads the current
- * session cookies at the moment the upload actually happens.
+ * createClient() at module level captures the auth state at import time (no session yet).
+ * By calling it inside each function, it reads the current session at upload time.
  */
 
 function generateFileName(file: File, folder: string = '') {
@@ -29,7 +20,6 @@ export async function uploadProductImage(
   file: File
 ): Promise<{ url: string | null; error: string | null }> {
   try {
-    // ← createClient() called here, inside the function, with the live session
     const supabase = createClient();
     const fileName = generateFileName(file, 'products');
 
@@ -54,7 +44,6 @@ export async function uploadCategoryImage(
   file: File
 ): Promise<{ url: string | null; error: string | null }> {
   try {
-    // ← createClient() called here, inside the function, with the live session
     const supabase = createClient();
     const fileName = generateFileName(file, 'categories');
 
@@ -75,13 +64,51 @@ export async function uploadCategoryImage(
   }
 }
 
+/**
+ * uploadSuggestionImage — uploads to the `suggestions` bucket.
+ *
+ * WHY a separate function & bucket:
+ * The suggest page is used by anonymous (unauthenticated) visitors.
+ * The `product-images` and `category-images` buckets require an authenticated
+ * Supabase session → RLS blocks anonymous uploads.
+ *
+ * The `suggestions` bucket has a PUBLIC INSERT policy so anyone can upload:
+ *   CREATE POLICY "public can upload suggestions"
+ *   ON storage.objects FOR INSERT TO public
+ *   WITH CHECK (bucket_id = 'suggestions');
+ *
+ * See the SQL section in the fix notes for the full setup script.
+ */
+export async function uploadSuggestionImage(
+  file: File
+): Promise<{ url: string | null; error: string | null }> {
+  try {
+    const supabase = createClient();
+    const fileName = generateFileName(file, 'suggestions');
+
+    const { error: uploadError } = await supabase.storage
+      .from('suggestions')
+      .upload(fileName, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('suggestions')
+      .getPublicUrl(fileName);
+
+    return { url: publicUrl, error: null };
+  } catch (error: any) {
+    console.error('[storage] uploadSuggestionImage error:', error);
+    return { url: null, error: error.message || 'حدث خطأ أثناء رفع الصورة' };
+  }
+}
+
 export async function deleteImage(
   url: string
 ): Promise<{ success: boolean; error: string | null }> {
   try {
     const supabase = createClient();
 
-    // Format: https://[project].supabase.co/storage/v1/object/public/[bucket]/[path]
     const urlParts = url.split('/storage/v1/object/public/');
     if (urlParts.length !== 2) {
       throw new Error('Invalid Supabase storage URL format');

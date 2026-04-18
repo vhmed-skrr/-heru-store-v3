@@ -2,48 +2,78 @@ import React from 'react';
 import Link from 'next/link';
 import { getSettings } from '@/lib/data/settings';
 
+/**
+ * Footer — Server Component
+ *
+ * WHY the old code was broken:
+ * The settings table stores data as key-value ROWS. getSettings() converts them
+ * to a flat object where keys are the setting names. The old Footer read:
+ *
+ *   settings?.instagram_url    → key is actually 'social_instagram'
+ *   settings?.facebook_url     → key is actually 'social_facebook'
+ *   settings?.tiktok_url       → key is actually 'social_tiktok'
+ *   settings?.telegram_url     → key is actually 'social_telegram'
+ *   settings?.whatsapp_phone   → key is actually 'whatsapp'
+ *   settings?.store_description → key is actually 'footer_tagline'
+ *
+ * None of these keys exist in the settings object → all social links and
+ * footer text were always undefined → nothing was ever displayed.
+ */
+
 export async function Footer() {
   const { data: settings } = await getSettings();
-  const storeName = settings?.store_name || 'Heru Store';
-  const storeDescription = settings?.store_description || 'أفضل متجر لشراء المنتجات المميزة بأعلى جودة.';
-  const phone = settings?.whatsapp_phone;
-  const email = settings?.store_email;
+
+  const storeName       = settings?.store_name       || 'Heru Store';
+  const footerTagline   = settings?.footer_tagline   || 'أفضل متجر لشراء المنتجات المميزة بأعلى جودة.';
+  const supportHours    = settings?.footer_support_hours;
+  const whatsapp        = settings?.whatsapp;
+
+  // Social links — keys must match exactly what adminSettings.ts saves
+  const instagram = settings?.social_instagram;
+  const facebook  = settings?.social_facebook;
+  const tiktok    = settings?.social_tiktok;
+  const telegram  = settings?.social_telegram;
 
   return (
     <footer className="bg-white border-t border-border mt-auto pt-10 pb-6 px-4">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Info Column */}
+
+          {/* ── Info + Social ─────────────────────────────────── */}
           <div>
             <h4 className="font-arabic font-bold text-xl text-brand-600 mb-4 pb-2">{storeName}</h4>
             <p className="text-text-sec text-sm leading-relaxed mb-4 max-w-sm">
-              {storeDescription}
+              {footerTagline}
             </p>
             <div className="flex flex-wrap gap-3 mt-4">
-              {settings?.instagram_url && (
-                <a href={settings.instagram_url} target="_blank" rel="noopener noreferrer" className="text-text-sec hover:text-brand-600 bg-brand-50 p-2 rounded-full transition-colors" aria-label="Instagram">
+              {instagram && (
+                <a href={instagram} target="_blank" rel="noopener noreferrer"
+                  className="text-text-sec hover:text-brand-600 bg-brand-50 p-2 rounded-full transition-colors" aria-label="Instagram">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                 </a>
               )}
-              {settings?.facebook_url && (
-                <a href={settings.facebook_url} target="_blank" rel="noopener noreferrer" className="text-text-sec hover:text-brand-600 bg-brand-50 p-2 rounded-full transition-colors" aria-label="Facebook">
+              {facebook && (
+                <a href={facebook} target="_blank" rel="noopener noreferrer"
+                  className="text-text-sec hover:text-brand-600 bg-brand-50 p-2 rounded-full transition-colors" aria-label="Facebook">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                 </a>
               )}
-              {settings?.tiktok_url && (
-                <a href={settings.tiktok_url} target="_blank" rel="noopener noreferrer" className="text-text-sec hover:text-brand-600 bg-brand-50 p-2 rounded-full transition-colors" aria-label="TikTok">
+              {tiktok && (
+                <a href={tiktok} target="_blank" rel="noopener noreferrer"
+                  className="text-text-sec hover:text-brand-600 bg-brand-50 p-2 rounded-full transition-colors" aria-label="TikTok">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5v3a3 3 0 0 0-3-3"></path></svg>
                 </a>
               )}
-              {settings?.telegram_url && (
-                <a href={settings.telegram_url} target="_blank" rel="noopener noreferrer" className="text-text-sec hover:text-brand-600 bg-brand-50 p-2 rounded-full transition-colors" aria-label="Telegram">
+              {telegram && (
+                <a href={telegram} target="_blank" rel="noopener noreferrer"
+                  className="text-text-sec hover:text-brand-600 bg-brand-50 p-2 rounded-full transition-colors" aria-label="Telegram">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </a>
               )}
             </div>
           </div>
 
-          {/* Quick Links Column */}
+          {/* ── Quick Links ──────────────────────────────────── */}
           <div>
             <h4 className="font-semibold text-text-main mb-4 text-base">روابط سريعة</h4>
             <ul className="flex flex-col gap-3">
@@ -54,24 +84,24 @@ export async function Footer() {
             </ul>
           </div>
 
-          {/* Contact Column */}
+          {/* ── Contact ─────────────────────────────────────── */}
           <div>
             <h4 className="font-semibold text-text-main mb-4 text-base">تواصل معنا</h4>
             <ul className="flex flex-col gap-4">
-              {phone && (
+              {whatsapp && (
                 <li className="flex items-center gap-3 text-text-sec text-sm">
                   <div className="bg-brand-50 text-brand-600 p-2 rounded-md">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                   </div>
-                  <span style={{ direction: 'ltr' }} className="font-medium">{phone}</span>
+                  <span style={{ direction: 'ltr' }} className="font-medium">{whatsapp}</span>
                 </li>
               )}
-              {email && (
+              {supportHours && (
                 <li className="flex items-center gap-3 text-text-sec text-sm">
                   <div className="bg-brand-50 text-brand-600 p-2 rounded-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                   </div>
-                  <span className="font-medium">{email}</span>
+                  <span className="font-medium">{supportHours}</span>
                 </li>
               )}
             </ul>
