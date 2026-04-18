@@ -128,7 +128,7 @@ export default function AdminReviewsPage() {
               ) : reviews.map(r => (
                 <tr key={r.id} className="border-b border-border/50 hover:bg-bg-secondary/40 transition-colors">
                   <td className="p-5 align-top">
-                    <div className="font-black text-text-main mb-1.5">{r.customer_name}</div>
+                    <div className="font-black text-text-main mb-1.5">{r.reviewer_name}</div>
                     <div className="text-xs font-medium text-text-sec bg-bg-secondary w-max px-2 py-0.5 rounded border border-border" dir="ltr">{new Date(r.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
                   </td>
                   <td className="p-5 align-top">{renderStars(r.rating)}</td>

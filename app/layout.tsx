@@ -9,6 +9,7 @@ import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
+import { WhatsAppFABWrapper } from "@/components/ui/WhatsAppFABWrapper";
 
 // Force dynamic rendering because Navbar uses cookies() via getSettings()
 export const dynamic = "force-dynamic";
@@ -111,6 +112,8 @@ export default async function RootLayout({
           {children}
           <Footer />
           <CartDrawer />
+          {/* WhatsAppFAB — hidden automatically on /admin/* pages */}
+          <WhatsAppFABWrapper />
         </ToastProvider>
       </body>
     </html>

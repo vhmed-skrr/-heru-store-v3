@@ -4,6 +4,7 @@ import { getSettings } from '@/lib/data/settings';
 import { AnnouncementBar } from './AnnouncementBar';
 import { MobileMenu } from './MobileMenu';
 import { CartButton } from './CartButton';
+import { SearchBar } from './SearchBar';
 
 export async function Navbar() {
   const { data: settings } = await getSettings();
@@ -43,12 +44,8 @@ export async function Navbar() {
 
           {/* Left: Search & Cart */}
           <div className="flex items-center gap-3">
-            <button aria-label="Search" className="p-2 text-text-main hover:text-brand-600 transition-colors hidden sm:block">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </button>
+            {/* SearchBar is a Client Component — routes to /shop?search=query */}
+            <SearchBar />
             <CartButton />
           </div>
         </div>

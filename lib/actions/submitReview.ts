@@ -2,12 +2,21 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Use the anon client directly (no cookies needed for public inserts)
-function getSupabaseClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+/**
+ * submitReview — Server Actions for product & store reviews
+ *
+ * Uses SERVICE_ROLE key instead of anon key.
+ * WHY: The anon key is subject to RLS policies. If the reviews table has
+ * RLS enabled (which is the default), anonymous inserts will be blocked.
+ * The service_role key bypasses RLS, allowing public users to submit reviews
+ * while keeping the logic secure server-side (this is a Server Action).
+ */
+
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error('[submitReview] Missing Supabase env vars');
+  return createClient(url, key);
 }
 
 export async function submitProductReview(data: {
@@ -17,15 +26,22 @@ export async function submitProductReview(data: {
   comment: string | null;
 }): Promise<{ data: { id: string } | null; error: string | null }> {
   try {
-    const supabase = getSupabaseClient();
+    if (!data.reviewer_name?.trim()) {
+      return { data: null, error: 'الاسم مطلوب' };
+    }
+    if (!data.rating || data.rating < 1 || data.rating > 5) {
+      return { data: null, error: 'يجب اختيار تقييم من 1 إلى 5 نجوم' };
+    }
+
+    const supabase = getSupabase();
     const { data: inserted, error } = await supabase
       .from('reviews')
       .insert({
-        product_id: data.product_id,
-        reviewer_name: data.reviewer_name,
-        rating: data.rating,
-        comment: data.comment,
-        approved: false,
+        product_id:    data.product_id,
+        reviewer_name: data.reviewer_name.trim(),
+        rating:        data.rating,
+        comment:       data.comment?.trim() || null,
+        approved:      false,
       })
       .select('id')
       .single();
@@ -33,6 +49,7 @@ export async function submitProductReview(data: {
     if (error) throw error;
     return { data: inserted as { id: string }, error: null };
   } catch (error: unknown) {
+    console.error('[submitProductReview] error:', error);
     return {
       data: null,
       error: error instanceof Error ? error.message : 'حدث خطأ أثناء إرسال المراجعة',
@@ -46,14 +63,21 @@ export async function submitStoreReview(data: {
   comment: string | null;
 }): Promise<{ data: { id: string } | null; error: string | null }> {
   try {
-    const supabase = getSupabaseClient();
+    if (!data.reviewer_name?.trim()) {
+      return { data: null, error: 'الاسم مطلوب' };
+    }
+    if (!data.rating || data.rating < 1 || data.rating > 5) {
+      return { data: null, error: 'يجب اختيار تقييم من 1 إلى 5 نجوم' };
+    }
+
+    const supabase = getSupabase();
     const { data: inserted, error } = await supabase
       .from('store_reviews')
       .insert({
-        reviewer_name: data.reviewer_name,
-        rating: data.rating,
-        comment: data.comment,
-        approved: false,
+        reviewer_name: data.reviewer_name.trim(),
+        rating:        data.rating,
+        comment:       data.comment?.trim() || null,
+        approved:      false,
       })
       .select('id')
       .single();
@@ -61,6 +85,7 @@ export async function submitStoreReview(data: {
     if (error) throw error;
     return { data: inserted as { id: string }, error: null };
   } catch (error: unknown) {
+    console.error('[submitStoreReview] error:', error);
     return {
       data: null,
       error: error instanceof Error ? error.message : 'حدث خطأ أثناء إرسال التقييم',
