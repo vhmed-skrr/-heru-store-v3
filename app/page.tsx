@@ -3,7 +3,7 @@ import { getCategories, getFeaturedCategories } from '@/lib/data/categories';
 import { getProducts } from '@/lib/data/products';
 import { getStoreReviews } from '@/lib/data/reviews';
 import { HeroSection } from '@/components/home/HeroSection';
-import { CategoriesSection } from '@/components/home/CategoriesSection';
+
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
 import { CategoryShowcase } from '@/components/home/CategoryShowcase';
 import { CategorySection } from '@/components/home/CategorySection';
@@ -30,7 +30,7 @@ export default async function HomePage() {
     <>
       <main className="flex-1 flex flex-col">
         <HeroSection settings={settings} />
-        <CategoriesSection categories={categories} />
+
         <CategoryShowcase categories={featuredCategories} />
         <FeaturedProducts products={featuredProducts} />
         
