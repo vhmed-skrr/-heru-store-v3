@@ -17,15 +17,20 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
+  /**
+   * Form state keys must match DB column names exactly:
+   *   image_url  ← was incorrectly `image`   (DB column: image_url)
+   *   sort_order ← was incorrectly `order_index` (DB column: sort_order)
+   */
   const [formData, setFormData] = useState({
-    name_ar: initialData?.name_ar || '',
-    name_en: initialData?.name_en || '',
-    color: initialData?.color || '#7c3aed',
-    icon: initialData?.icon || '🛒',
-    image: initialData?.image || '',
-    order_index: initialData?.order_index?.toString() || '0',
-    active: initialData !== undefined ? initialData.active : true
+    name_ar:    initialData?.name_ar    || '',
+    name_en:    initialData?.name_en    || '',
+    color:      initialData?.color      || '#7c3aed',
+    icon:       initialData?.icon       || '🛒',
+    image_url:  initialData?.image_url  || '',           // ← image_url, not image
+    sort_order: initialData?.sort_order?.toString() || '0', // ← sort_order, not order_index
+    active:     initialData !== undefined ? initialData.active : true,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,34 +44,39 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
   };
 
   const handleImageChange = (urls: string[]) => {
-    setFormData(prev => ({ ...prev, image: urls[0] || '' }));
+    setFormData(prev => ({ ...prev, image_url: urls[0] || '' })); // ← image_url
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name_ar.trim()) return toast("الاسم العربي مطلوب", "error");
+
+    if (!formData.name_ar.trim()) return toast('الاسم العربي مطلوب', 'error');
 
     setIsSubmitting(true);
 
+    /**
+     * Only send fields that exist in the DB schema.
+     * The server action (adminCategories.ts) uses buildDbPayload() which also
+     * enforces this, but being explicit here is safer and clearer.
+     */
     const payload: Partial<Category> = {
-      ...initialData,
-      name_ar: formData.name_ar,
-      name_en: formData.name_en || undefined,
-      color: formData.color,
-      icon: formData.icon,
-      image: formData.image || undefined,
-      order_index: parseInt(formData.order_index) || 0,
-      active: formData.active
+      ...(initialData?.id ? { id: initialData.id } : {}),
+      name_ar:    formData.name_ar,
+      name_en:    formData.name_en || '',
+      color:      formData.color,
+      icon:       formData.icon,
+      image_url:  formData.image_url || null,  // ← image_url, not image
+      sort_order: parseInt(formData.sort_order) || 0, // ← sort_order, not order_index
+      active:     formData.active,
     };
 
     const { success, error } = await upsertCategory(payload);
 
     if (success) {
-      toast("تم حفظ التصنيف بنجاح", "success");
+      toast('تم حفظ التصنيف بنجاح', 'success');
       router.push('/admin/categories');
     } else {
-      toast(`حدث خطأ: ${error}`, "error");
+      toast(`حدث خطأ: ${error}`, 'error');
     }
 
     setIsSubmitting(false);
@@ -88,12 +98,18 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
           </div>
         </div>
         <Input label="أيقونة (إيموجي)" name="icon" value={formData.icon} onChange={handleChange} placeholder="مثال: 👟" />
-        <Input label="ترتيب العرض" name="order_index" type="number" value={formData.order_index} onChange={handleChange} dir="ltr" />
+        {/* name="sort_order" — matches DB column exactly */}
+        <Input label="ترتيب العرض" name="sort_order" type="number" value={formData.sort_order} onChange={handleChange} dir="ltr" />
       </div>
 
       <div className="flex flex-col gap-2">
         <label className="text-sm font-semibold text-text-main">صورة التصنيف (للعرض في الواجهة)</label>
-        <ImageUploader value={formData.image ? [formData.image] : []} onChange={handleImageChange} maxImages={1} bucket="category-images" />
+        <ImageUploader
+          value={formData.image_url ? [formData.image_url] : []}
+          onChange={handleImageChange}
+          maxImages={1}
+          bucket="category-images"
+        />
       </div>
 
       <div className="flex items-center gap-2 pt-4 border-t border-border">

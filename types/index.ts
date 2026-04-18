@@ -2,13 +2,18 @@ export interface Category {
   id: string;
   name_ar: string;
   name_en: string;
-  slug?: string | null;
   color: string | null;
   icon: string | null;
-  image: string | null;
+  /**
+   * DB column is `image_url` — NOT `image`.
+   * schema.sql: image_url TEXT
+   */
   image_url: string | null;
+  /**
+   * DB column is `sort_order` — NOT `order_index`.
+   * schema.sql: sort_order INTEGER DEFAULT 0
+   */
   sort_order: number;
-  order_index?: number;
   active: boolean;
   created_at: string;
 }
@@ -117,10 +122,17 @@ export interface Suggestion {
   created_at: string;
 }
 
+/**
+ * The `settings` table uses a key-value schema:
+ *   id UUID, key TEXT UNIQUE, value JSONB, created_at
+ *
+ * Each setting is a separate ROW — not a column.
+ * Do NOT try to query/upsert settings as a single flat row.
+ */
 export interface Setting {
   id: string;
   key: string;
-  value: string | Record<string, unknown> | null;
+  value: string | boolean | number | string[] | Record<string, unknown> | null;
   created_at: string;
 }
 

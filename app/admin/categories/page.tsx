@@ -52,12 +52,12 @@ export default async function AdminCategoriesPage() {
                   <td colSpan={6} className="p-12 text-center text-text-sec font-medium">لا توجد تصنيفات حالياً. ابدأ بإضافة تصنيف جديد.</td>
                 </tr>
               ) : (
-                categories.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)).map((category) => (
+                categories.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)).map((category) => (
                   <tr key={category.id} className="border-b border-border hover:bg-bg-secondary/50 transition-colors">
                     <td className="p-4">
                       <div className="w-12 h-12 relative rounded border border-border overflow-hidden bg-bg-secondary flex items-center justify-center">
-                        {category.image ? (
-                          <Image src={category.image} alt={category.name_ar} fill className="object-cover" sizes="48px" />
+                        {category.image_url ? (
+                          <Image src={category.image_url} alt={category.name_ar} fill className="object-cover" sizes="48px" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-xs text-text-sec">-</div>
                         )}
@@ -77,7 +77,7 @@ export default async function AdminCategoriesPage() {
                     </td>
                     <td className="p-4">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded bg-brand-50 text-brand-600 font-bold text-sm">
-                        {category.order_index || 0}
+                        {category.sort_order || 0}
                       </span>
                     </td>
                     <td className="p-4">

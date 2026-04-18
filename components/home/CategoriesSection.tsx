@@ -17,12 +17,12 @@ export function CategoriesSection({ categories }: { categories: Category[] | nul
           {categories.slice(0, 8).map((cat) => (
             <Link 
               key={cat.id} 
-              href={`/category/${cat.slug}`}
+              href={`/category/${cat.id}`}
               className="group relative aspect-square overflow-hidden rounded-lg bg-bg-secondary shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-[1.05]"
             >
-              {cat.image && (
+              {cat.image_url && (
                 <Image 
-                  src={cat.image} 
+                  src={cat.image_url} 
                   alt={cat.name_ar} 
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
