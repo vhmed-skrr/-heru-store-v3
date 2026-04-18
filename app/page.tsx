@@ -26,7 +26,7 @@ export default async function HomePage() {
   return (
     <>
       <main className="flex-1 flex flex-col">
-        <HeroSection settings={settings} categories={categories} />
+        <HeroSection settings={settings} />
         <CategoriesSection categories={categories} />
         <FeaturedProducts products={featuredProducts} />
         <OfferBanner settings={settings} />
