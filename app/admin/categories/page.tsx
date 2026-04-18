@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getCategories } from '@/lib/data/categories';
 import { DeleteCategoryButton } from '@/components/admin/DeleteCategoryButton';
+import { ToggleHomepageButton } from '@/components/admin/ToggleHomepageButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -111,6 +112,10 @@ export default async function AdminCategoriesPage() {
                             in this Server Component → "ReferenceError: window is not defined"
                             → "حدث خطأ غير متوقع" for the entire page.
                           */}
+                          <ToggleHomepageButton 
+                            categoryId={category.id} 
+                            initialValue={!!category.show_on_homepage} 
+                          />
                           <DeleteCategoryButton
                             categoryId={category.id}
                             categoryName={category.name_ar}

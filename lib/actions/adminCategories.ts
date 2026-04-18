@@ -93,3 +93,23 @@ export async function deleteCategory(id: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function toggleCategoryHomepage(id: string, show_on_homepage: boolean) {
+  try {
+    const supabase = getAdminSupabase();
+    const { error } = await supabase
+      .from('categories')
+      .update({ show_on_homepage })
+      .eq('id', id);
+    if (error) throw error;
+
+    revalidatePath('/');
+    revalidatePath('/shop');
+    revalidatePath('/admin/categories');
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('[adminCategories] toggleCategoryHomepage error:', error);
+    return { success: false, error: error.message };
+  }
+}

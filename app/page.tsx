@@ -1,11 +1,11 @@
 import { getSettings } from '@/lib/data/settings';
-import { getCategories } from '@/lib/data/categories';
+import { getCategories, getFeaturedCategories } from '@/lib/data/categories';
 import { getProducts } from '@/lib/data/products';
 import { getStoreReviews } from '@/lib/data/reviews';
 import { HeroSection } from '@/components/home/HeroSection';
 import { CategoriesSection } from '@/components/home/CategoriesSection';
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
-import { OfferBanner } from '@/components/home/OfferBanner';
+import { CategoryShowcase } from '@/components/home/CategoryShowcase';
 import { StoreReviews } from '@/components/home/StoreReviews';
 
 export const revalidate = 60; // ISR for 60 seconds
@@ -15,12 +15,14 @@ export default async function HomePage() {
     { data: settings },
     { data: categories },
     { data: featuredProducts },
-    { data: storeReviews }
+    { data: storeReviews },
+    { data: featuredCategories }
   ] = await Promise.all([
     getSettings(),
     getCategories(),
     getProducts({ featured: true, limit: 8 }),
-    getStoreReviews(6)
+    getStoreReviews(6),
+    getFeaturedCategories()
   ]);
 
   return (
@@ -29,7 +31,7 @@ export default async function HomePage() {
         <HeroSection settings={settings} />
         <CategoriesSection categories={categories} />
         <FeaturedProducts products={featuredProducts} />
-        <OfferBanner settings={settings} />
+        <CategoryShowcase categories={featuredCategories} />
         <StoreReviews reviews={storeReviews} />
       </main>
     </>

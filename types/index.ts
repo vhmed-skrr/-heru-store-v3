@@ -14,6 +14,7 @@ export interface Category {
    * schema.sql: sort_order INTEGER DEFAULT 0
    */
   sort_order: number;
+  show_on_homepage?: boolean;
   active: boolean;
   created_at: string;
 }
