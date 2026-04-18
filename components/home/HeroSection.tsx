@@ -1,6 +1,7 @@
-// Hero Section v2 — Redesign only, no functional changes
+// Hero Section v3 — PartyHuren-inspired redesign, no functional changes
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Category } from '@/types';
 
 interface HeroSectionProps {
@@ -9,300 +10,369 @@ interface HeroSectionProps {
 }
 
 /**
- * HeroSection v2
+ * HeroSection v3 — PartyHuren Layout
  *
- * Desktop layout (≥1024px):
- *   [Image panel 60%]  |  [Content panel 40%]
- *   Two layered image placeholders + giant overlay text
- *   Scroll indicator at bottom-left
+ * Desktop (≥1024px) — RTL:
+ *   ┌───────────────────┬──────────────────────────────┐
+ *   │  بطاقة 1 (أعلى)  │  العنوان + الأزرار           │
+ *   │  خلفية ملونة     │                               │
+ *   │  صورة + عنوان    │  صورة المنتج الرئيسية استُحضرت│
+ *   ├───────────────────│  من settings hero_main_image │
+ *   │  بطاقة 2 (أسفل)  │  عناصر هندسية decorative     │
+ *   │  خلفية ملونة     │                               │
+ *   └───────────────────┴──────────────────────────────┘
  *
- * Mobile layout (<1024px):
- *   Full-width image with dark gradient overlay + centered content
+ * Mobile (<1024px):
+ *   المنطقة الرئيسية كاملة العرض → البطاقتان في grid 2-col
  *
- * All data still comes from the same props:
- *   settings.hero_title / hero_subtitle / hero_cta_primary / hero_cta_secondary
- *   categories → first 4 shown as quick-access pill buttons
- *
- * Visual changes only — no functional or data changes.
+ * All data from settings:
+ *   hero_title / hero_subtitle / hero_cta_primary / hero_cta_secondary
+ *   hero_main_image / hero_card1_* / hero_card2_*
  */
 export function HeroSection({ settings, categories }: HeroSectionProps) {
+  // ── Main hero content ──────────────────────────────────────
   const title        = settings?.hero_title        || 'أفضل المنتجات بأقل الأسعار';
   const subtitle     = settings?.hero_subtitle     || 'اكتشف تشكيلة واسعة من المنتجات المميزة التي تليق بك.';
   const ctaPrimary   = settings?.hero_cta_primary  || 'تسوق الآن';
   const ctaSecondary = settings?.hero_cta_secondary || 'اقترح تصميم';
+  const mainImage    = settings?.hero_main_image   || '';
 
-  // Up to 4 quick-access category pills
+  // ── Card 1 ────────────────────────────────────────────────
+  const card1Title    = settings?.hero_card1_title    || 'تصاميم مميزة';
+  const card1Subtitle = settings?.hero_card1_subtitle || 'جودة عالية';
+  const card1Image    = settings?.hero_card1_image    || '';
+  const card1Bg       = settings?.hero_card1_bg       || '#7c3aed';
+  const card1Link     = settings?.hero_card1_link     || '/shop';
+
+  // ── Card 2 ────────────────────────────────────────────────
+  const card2Title    = settings?.hero_card2_title    || 'عروض حصرية';
+  const card2Subtitle = settings?.hero_card2_subtitle || 'خصومات يومية';
+  const card2Image    = settings?.hero_card2_image    || '';
+  const card2Bg       = settings?.hero_card2_bg       || '#6d28d9';
+  const card2Link     = settings?.hero_card2_link     || '/shop';
+
+  // Up to 4 category pills
   const quickCats = (categories ?? []).slice(0, 4);
 
-  // Background colors for the two image panels
-  const panel1Bg = 'from-violet-900 via-purple-800 to-indigo-900';
-  const panel2Bg = 'from-indigo-900 via-purple-900 to-violet-800';
-
   return (
-    <section
-      className="relative w-full min-h-[100svh] lg:h-screen flex flex-col lg:flex-row overflow-hidden font-arabic"
-      dir="rtl"
-    >
-      {/* ─────────────────────────────────────────────────
-          LEFT PANEL (60%) — Image panels + overlay text
-          On mobile: becomes full-width background
-      ───────────────────────────────────────────────── */}
-      <div className="relative flex w-full lg:w-[60%] h-[60vw] min-h-[280px] lg:h-full overflow-hidden">
+    <section className="w-full bg-white font-arabic" dir="rtl">
+      {/* ══════════════════════════════════════════════════════
+          DESKTOP LAYOUT (≥1024px): 2 columns
+          Right: side cards | Left: main hero area
+      ══════════════════════════════════════════════════════ */}
+      <div className="hidden lg:grid grid-cols-[280px_1fr] xl:grid-cols-[320px_1fr] min-h-[600px] xl:min-h-[680px]">
 
-        {/* Panel 1 — main (wider) */}
-        <div
-          className={`relative flex-[1.4] h-full bg-gradient-to-br ${panel1Bg} overflow-hidden`}
-        >
-          {/* Decorative noise texture overlay */}
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-            }}
-          />
+        {/* ── LEFT COLUMN: Side Cards ─────────────────────── */}
+        <div className="flex flex-col gap-0 border-l border-gray-100">
 
-          {/* Radial glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(139,92,246,0.4)_0%,transparent_70%)]" />
+          {/* Card 1 */}
+          <Link
+            href={card1Link}
+            className="relative flex-1 flex flex-col justify-between p-7 overflow-hidden group transition-opacity hover:opacity-95 border-b border-white/15"
+            style={{ backgroundColor: card1Bg }}
+          >
+            {/* Decorative circle */}
+            <div className="absolute -top-10 -left-10 w-36 h-36 rounded-full bg-white/10 pointer-events-none" />
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-black/10 pointer-events-none" />
 
-          {/* Abstract geometric shape */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] aspect-square rounded-full bg-white/5 border border-white/10" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[45%] aspect-square rounded-full bg-white/5 border border-white/10" />
+            {/* Card image */}
+            {card1Image ? (
+              <div className="relative w-full aspect-square max-w-[130px] mx-auto mb-4 rounded-xl overflow-hidden shadow-lg">
+                <Image src={card1Image} alt={card1Title} fill className="object-cover" sizes="130px" />
+              </div>
+            ) : (
+              <div className="w-full max-w-[130px] mx-auto mb-4 aspect-square rounded-xl bg-white/20 flex items-center justify-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
+                  <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              </div>
+            )}
 
-          {/* Category pill label on Panel 1 */}
-          <div className="absolute top-5 right-5">
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
-              Collection 2025
-            </span>
-          </div>
+            {/* Card text */}
+            <div className="relative z-10">
+              <h3 className="text-white font-black text-xl leading-tight mb-1 font-arabic">{card1Title}</h3>
+              <p className="text-white/75 text-sm font-medium mb-4">{card1Subtitle}</p>
+              <span className="inline-flex items-center gap-1.5 bg-white text-gray-900 text-xs font-black px-4 py-2 rounded-full shadow-sm group-hover:shadow-md transition-shadow">
+                تسوق الآن
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </span>
+            </div>
+          </Link>
 
-          {/* Product imagery placeholder — centered icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <svg className="w-24 h-24 text-white/10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M1.5 8.25a.75.75 0 0 1 .75-.75h19.5a.75.75 0 0 1 0 1.5H2.25a.75.75 0 0 1-.75-.75ZM1.5 4.5A.75.75 0 0 1 2.25 3.75h19.5a.75.75 0 0 1 0 1.5H2.25A.75.75 0 0 1 1.5 4.5ZM1.5 12a.75.75 0 0 1 .75-.75h19.5a.75.75 0 0 1 0 1.5H2.25A.75.75 0 0 1 1.5 12ZM1.5 15.75a.75.75 0 0 1 .75-.75h19.5a.75.75 0 0 1 0 1.5H2.25a.75.75 0 0 1-.75-.75ZM1.5 19.5a.75.75 0 0 1 .75-.75h19.5a.75.75 0 0 1 0 1.5H2.25a.75.75 0 0 1-.75-.75Z"/>
+          {/* Card 2 */}
+          <Link
+            href={card2Link}
+            className="relative flex-1 flex flex-col justify-between p-7 overflow-hidden group transition-opacity hover:opacity-95"
+            style={{ backgroundColor: card2Bg }}
+          >
+            {/* Decorative triangle SVG */}
+            <svg className="absolute top-3 left-3 opacity-10 w-16 h-16" viewBox="0 0 100 100" fill="white">
+              <polygon points="50,10 90,80 10,80" />
+            </svg>
+            <div className="absolute -bottom-8 right-4 w-28 h-28 rounded-full bg-white/10 pointer-events-none" />
+
+            {/* Card image */}
+            {card2Image ? (
+              <div className="relative w-full aspect-square max-w-[130px] mx-auto mb-4 rounded-xl overflow-hidden shadow-lg">
+                <Image src={card2Image} alt={card2Title} fill className="object-cover" sizes="130px" />
+              </div>
+            ) : (
+              <div className="w-full max-w-[130px] mx-auto mb-4 aspect-square rounded-xl bg-white/20 flex items-center justify-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-60">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+                </svg>
+              </div>
+            )}
+
+            {/* Card text */}
+            <div className="relative z-10">
+              <h3 className="text-white font-black text-xl leading-tight mb-1 font-arabic">{card2Title}</h3>
+              <p className="text-white/75 text-sm font-medium mb-4">{card2Subtitle}</p>
+              <span className="inline-flex items-center gap-1.5 bg-white text-gray-900 text-xs font-black px-4 py-2 rounded-full shadow-sm group-hover:shadow-md transition-shadow">
+                اكتشف الآن
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        {/* ── RIGHT COLUMN: Main Hero Area ────────────────── */}
+        <div className="relative flex flex-col justify-center overflow-hidden bg-gradient-to-bl from-violet-50 via-white to-indigo-50 px-10 xl:px-16 py-12">
+
+          {/* Decorative background elements */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {/* Large circle top-right */}
+            <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full border-2 border-violet-100 opacity-60" />
+            <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-violet-50 opacity-80" />
+            {/* Small circles */}
+            <div className="absolute top-1/3 left-16 w-6 h-6 rounded-full bg-violet-200 opacity-50" />
+            <div className="absolute top-1/4 left-32 w-3 h-3 rounded-full bg-indigo-300 opacity-40" />
+            {/* Triangle bottom-left */}
+            <svg className="absolute bottom-12 left-8 opacity-10 w-20 h-20" viewBox="0 0 100 100" fill="none" stroke="#7c3aed" strokeWidth="3">
+              <polygon points="50,5 95,90 5,90" />
+            </svg>
+            {/* Dotted grid pattern */}
+            <svg className="absolute bottom-0 right-0 opacity-[0.04] w-64 h-64" viewBox="0 0 100 100">
+              {Array.from({ length: 5 }).map((_, row) =>
+                Array.from({ length: 5 }).map((_, col) => (
+                  <circle key={`${row}-${col}`} cx={col * 25 + 12} cy={row * 25 + 12} r="2" fill="#7c3aed" />
+                ))
+              )}
             </svg>
           </div>
-        </div>
 
-        {/* Thin divider line */}
-        <div className="w-px bg-white/10 shrink-0 self-stretch" />
+          {/* Content */}
+          <div className="relative z-10 flex flex-col xl:flex-row items-center gap-8 xl:gap-12">
 
-        {/* Panel 2 — secondary (narrower) */}
-        <div
-          className={`relative flex-1 h-full bg-gradient-to-tl ${panel2Bg} overflow-hidden`}
-        >
-          {/* Radial glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_60%,rgba(167,139,250,0.3)_0%,transparent_70%)]" />
-
-          {/* Social proof chip */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-3 py-1.5">
-            <span className="flex -space-x-1.5 rtl:space-x-reverse">
-              {['bg-violet-400', 'bg-purple-400', 'bg-indigo-400'].map((c, i) => (
-                <span key={i} className={`w-5 h-5 rounded-full ${c} border-2 border-white/20 block`} />
-              ))}
-            </span>
-            <span className="text-white text-[11px] font-bold whitespace-nowrap">+1000 عميل</span>
-          </div>
-
-          {/* Geometric accent */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/5 border border-white/10" />
-        </div>
-
-        {/* ── OVERLAY GIANT TEXT ── */}
-        {/* Massive editorial text bleeding across both panels */}
-        <div
-          className="absolute bottom-0 right-0 left-0 pointer-events-none select-none overflow-hidden pb-3 px-4"
-          aria-hidden="true"
-        >
-          <span
-            className="block font-black text-white leading-none whitespace-nowrap"
-            style={{
-              fontSize: 'clamp(60px, 12vw, 150px)',
-              opacity: 0.12,
-              mixBlendMode: 'overlay',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            {title.split(' ')[0] || 'Heru'}
-          </span>
-        </div>
-
-        {/* ── SCROLL INDICATOR ── */}
-        <div className="hidden lg:flex absolute bottom-6 right-6 flex-col items-center gap-2 text-white/50">
-          <span className="text-[11px] font-medium tracking-widest uppercase rotate-90 origin-center">اكتشف أكثر</span>
-          <div className="w-px h-12 bg-white/20 animate-pulse" />
-          <svg
-            className="w-4 h-4 animate-bounce"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <polyline points="19 12 12 19 5 12" />
-          </svg>
-        </div>
-
-        {/* Bottom dark fade on mobile — helps legibility of text overlay */}
-        <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/60 to-transparent lg:hidden" />
-      </div>
-
-      {/* ─────────────────────────────────────────────────
-          RIGHT PANEL (40%) — Content
-          On mobile: overlaps image as absolute overlay
-      ───────────────────────────────────────────────── */}
-
-      {/* Mobile overlay content (absolute, sits on top of image panel on small screens) */}
-      <div className="lg:hidden absolute inset-x-0 bottom-0 px-6 pb-10 pt-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col items-center text-center z-10">
-        <h1 className="text-white font-arabic font-black text-3xl sm:text-4xl leading-tight mb-3 drop-shadow-lg">
-          {title}
-        </h1>
-        <p className="text-white/80 text-sm sm:text-base mb-6 max-w-xs font-medium leading-relaxed">
-          {subtitle}
-        </p>
-        <div className="flex items-center gap-3 flex-col sm:flex-row w-full max-w-xs">
-          <Link
-            href="/shop"
-            className="w-full sm:w-auto px-7 py-3 bg-violet-600 text-white font-bold rounded-xl hover:bg-violet-700 active:scale-95 transition-all shadow-lg shadow-violet-900/40 text-sm"
-          >
-            {ctaPrimary}
-          </Link>
-          <Link
-            href="/suggest"
-            className="w-full sm:w-auto px-7 py-3 bg-white/10 backdrop-blur-sm border border-white/30 text-white font-bold rounded-xl hover:bg-white/20 active:scale-95 transition-all text-sm"
-          >
-            {ctaSecondary}
-          </Link>
-        </div>
-      </div>
-
-      {/* Desktop right content panel */}
-      <div
-        className="
-          hidden lg:flex
-          flex-col justify-center
-          w-[40%] h-full
-          bg-white
-          px-10 xl:px-16
-          border-r border-gray-100
-          relative overflow-hidden
-        "
-      >
-        {/* Subtle background accent blob */}
-        <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-violet-50 blur-3xl opacity-80 pointer-events-none" />
-        <div className="absolute -bottom-16 -right-10 w-56 h-56 rounded-full bg-indigo-50 blur-3xl opacity-60 pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col gap-8">
-
-          {/* Brand badge */}
-          <div>
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[0.15em] uppercase text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-3 py-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse block" />
-              New Collection
-            </span>
-          </div>
-
-          {/* Main heading — animates in from right in RTL */}
-          <div>
-            <h1
-              className="font-arabic font-black text-gray-900 leading-[1.1] mb-5"
-              style={{ fontSize: 'clamp(2rem, 3.5vw, 3.5rem)' }}
-            >
-              {title}
-            </h1>
-            <p className="text-gray-500 text-base xl:text-lg leading-relaxed max-w-sm font-medium">
-              {subtitle}
-            </p>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-start gap-3">
-            <Link
-              href="/shop"
-              className="
-                inline-flex items-center gap-2 justify-center
-                px-7 py-3.5
-                bg-violet-600 text-white
-                font-bold text-sm
-                rounded-xl
-                hover:bg-violet-700 active:scale-95
-                transition-all duration-200
-                shadow-lg shadow-violet-600/25
-                whitespace-nowrap
-              "
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-              </svg>
-              {ctaPrimary}
-            </Link>
-            <Link
-              href="/suggest"
-              className="
-                inline-flex items-center gap-2 justify-center
-                px-7 py-3.5
-                bg-transparent text-gray-700
-                font-bold text-sm
-                rounded-xl
-                border-2 border-gray-200
-                hover:border-violet-400 hover:text-violet-600
-                active:scale-95
-                transition-all duration-200
-                whitespace-nowrap
-              "
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-              </svg>
-              {ctaSecondary}
-            </Link>
-          </div>
-
-          {/* Quick Category Pills */}
-          {quickCats.length > 0 && (
-            <div>
-              <p className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-3">تصفح حسب</p>
-              <div className="flex flex-wrap gap-2">
-                {quickCats.map((cat) => (
-                  <Link
-                    key={cat.id}
-                    href={`/shop?category=${cat.id}`}
-                    className="
-                      inline-flex items-center gap-1.5
-                      px-4 py-1.5
-                      rounded-full
-                      border border-gray-200
-                      text-xs font-bold text-gray-600
-                      bg-white
-                      hover:bg-violet-600 hover:text-white hover:border-violet-600
-                      transition-all duration-200
-                      shadow-sm
-                    "
-                  >
-                    {cat.icon && <span>{cat.icon}</span>}
-                    {cat.name_ar}
-                  </Link>
-                ))}
+            {/* Text block */}
+            <div className="flex flex-col gap-6 xl:max-w-sm 2xl:max-w-md">
+              {/* Brand label */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-0.5 bg-violet-500 rounded" />
+                <span className="text-xs font-black tracking-[0.2em] uppercase text-violet-600">Heru Store</span>
               </div>
+
+              {/* Main heading */}
+              <h1 className="font-arabic font-black text-gray-900 leading-[1.1]" style={{ fontSize: 'clamp(2rem, 3.2vw, 3.2rem)' }}>
+                {title}
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-gray-500 text-base xl:text-lg leading-relaxed font-medium max-w-sm">
+                {subtitle}
+              </p>
+
+              {/* CTA Buttons — preserved exactly */}
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/shop"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 bg-violet-600 text-white font-black text-sm rounded-xl hover:bg-violet-700 active:scale-95 transition-all shadow-lg shadow-violet-600/30 whitespace-nowrap"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                  </svg>
+                  {ctaPrimary}
+                </Link>
+                <Link
+                  href="/suggest"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 bg-transparent text-gray-700 font-black text-sm rounded-xl border-2 border-gray-200 hover:border-violet-400 hover:text-violet-700 active:scale-95 transition-all whitespace-nowrap"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                  {ctaSecondary}
+                </Link>
+              </div>
+
+              {/* Quick Category Pills */}
+              {quickCats.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {quickCats.map(cat => (
+                    <Link
+                      key={cat.id}
+                      href={`/shop?category=${cat.id}`}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-bold text-gray-600 hover:bg-violet-600 hover:text-white hover:border-violet-600 transition-all shadow-sm"
+                    >
+                      {cat.icon && <span>{cat.icon}</span>}
+                      {cat.name_ar}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Main Product Image */}
+            <div className="relative flex-1 flex items-center justify-center">
+              {mainImage ? (
+                <div className="relative w-full max-w-[320px] xl:max-w-[380px] aspect-square">
+                  {/* Glowing background circle */}
+                  <div className="absolute inset-4 rounded-full bg-violet-100/80 blur-xl" />
+                  <Image
+                    src={mainImage}
+                    alt={title}
+                    fill
+                    className="object-contain drop-shadow-2xl relative z-10"
+                    sizes="(max-width: 1280px) 320px, 380px"
+                    priority
+                  />
+                </div>
+              ) : (
+                /* Fallback: decorative gradient orb */
+                <div className="relative w-[280px] xl:w-[340px] aspect-square">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-400 via-purple-500 to-indigo-600 opacity-90 shadow-2xl shadow-violet-500/40" />
+                  <div className="absolute inset-6 rounded-full bg-gradient-to-tl from-violet-300 to-indigo-400 opacity-60" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="font-arabic font-black text-white text-5xl xl:text-6xl tracking-tight drop-shadow-lg">
+                      Heru
+                    </span>
+                  </div>
+                  {/* Floating decorative rings */}
+                  <div className="absolute -top-3 -right-3 w-16 h-16 rounded-full border-4 border-violet-300/50" />
+                  <div className="absolute -bottom-4 -left-4 w-12 h-12 rounded-full border-4 border-indigo-300/40" />
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Stats strip */}
-          <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
+          <div className="relative z-10 flex items-center gap-8 mt-10 pt-6 border-t border-gray-100">
             {[
-              { label: 'منتج متاح', value: '100+' },
-              { label: 'عميل سعيد', value: '1K+' },
-              { label: 'تقييم ممتاز', value: '4.9★' },
-            ].map((stat) => (
+              { value: '100+', label: 'منتج متاح' },
+              { value: '1K+',  label: 'عميل سعيد' },
+              { value: '4.9★', label: 'متوسط التقييم' },
+            ].map(stat => (
               <div key={stat.label} className="flex flex-col">
-                <span className="font-black text-gray-900 text-xl leading-none" dir="ltr">{stat.value}</span>
-                <span className="text-gray-400 text-[11px] font-medium mt-0.5">{stat.label}</span>
+                <span className="font-black text-gray-900 text-2xl leading-none" dir="ltr">{stat.value}</span>
+                <span className="text-gray-400 text-[11px] font-medium mt-1">{stat.label}</span>
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
+          MOBILE LAYOUT (<1024px)
+      ══════════════════════════════════════════════════════ */}
+      <div className="lg:hidden flex flex-col">
+
+        {/* Main hero area */}
+        <div className="relative min-h-[460px] sm:min-h-[520px] bg-gradient-to-br from-violet-50 to-indigo-50 overflow-hidden flex flex-col justify-center px-6 pt-10 pb-8">
+          {/* Decorative circles */}
+          <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-violet-100 opacity-60 pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-indigo-100 opacity-50 pointer-events-none" />
+          <svg className="absolute bottom-8 right-6 opacity-10 w-16 h-16" viewBox="0 0 100 100" fill="none" stroke="#7c3aed" strokeWidth="3"><polygon points="50,5 95,90 5,90" /></svg>
+
+          {/* Main image */}
+          {mainImage ? (
+            <div className="relative w-40 h-40 sm:w-52 sm:h-52 mx-auto mb-6">
+              <div className="absolute inset-2 rounded-full bg-violet-200/50 blur-lg" />
+              <Image src={mainImage} alt={title} fill className="object-contain drop-shadow-xl relative z-10" sizes="208px" priority />
+            </div>
+          ) : (
+            <div className="relative w-36 h-36 mx-auto mb-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 shadow-xl flex items-center justify-center">
+              <span className="font-arabic font-black text-white text-4xl">Heru</span>
+            </div>
+          )}
+
+          {/* Text */}
+          <div className="relative z-10 text-center">
+            <h1 className="font-arabic font-black text-gray-900 text-3xl sm:text-4xl leading-tight mb-3">
+              {title}
+            </h1>
+            <p className="text-gray-500 text-sm sm:text-base leading-relaxed mb-6 max-w-sm mx-auto font-medium">
+              {subtitle}
+            </p>
+            {/* CTA Buttons — preserved */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href="/shop"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-600 text-white font-black text-sm rounded-xl hover:bg-violet-700 active:scale-95 transition-all shadow-lg shadow-violet-600/30"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                {ctaPrimary}
+              </Link>
+              <Link
+                href="/suggest"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white text-gray-700 font-black text-sm rounded-xl border-2 border-gray-200 hover:border-violet-400 hover:text-violet-700 active:scale-95 transition-all"
+              >
+                {ctaSecondary}
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Side cards — 2-column grid on mobile */}
+        <div className="grid grid-cols-2 gap-0 border-t border-gray-100">
+          {/* Card 1 */}
+          <Link
+            href={card1Link}
+            className="relative flex flex-col justify-between p-5 overflow-hidden group border-l border-white/15 min-h-[180px]"
+            style={{ backgroundColor: card1Bg }}
+          >
+            <div className="absolute -top-8 -left-8 w-24 h-24 rounded-full bg-white/10 pointer-events-none" />
+            {card1Image ? (
+              <div className="relative w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden shadow-md">
+                <Image src={card1Image} alt={card1Title} fill className="object-cover" sizes="64px" />
+              </div>
+            ) : (
+              <div className="w-14 h-14 mx-auto mb-3 rounded-xl bg-white/20 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+            )}
+            <div className="relative z-10 text-center">
+              <h3 className="text-white font-black text-sm leading-tight mb-1 font-arabic">{card1Title}</h3>
+              <p className="text-white/70 text-xs font-medium mb-3">{card1Subtitle}</p>
+              <span className="inline-flex items-center gap-1 bg-white text-gray-900 text-[10px] font-black px-3 py-1.5 rounded-full">
+                تسوق
+              </span>
+            </div>
+          </Link>
+
+          {/* Card 2 */}
+          <Link
+            href={card2Link}
+            className="relative flex flex-col justify-between p-5 overflow-hidden group min-h-[180px]"
+            style={{ backgroundColor: card2Bg }}
+          >
+            <svg className="absolute top-2 left-2 opacity-10 w-12 h-12" viewBox="0 0 100 100" fill="white"><polygon points="50,10 90,80 10,80" /></svg>
+            {card2Image ? (
+              <div className="relative w-16 h-16 mx-auto mb-3 rounded-xl overflow-hidden shadow-md">
+                <Image src={card2Image} alt={card2Title} fill className="object-cover" sizes="64px" />
+              </div>
+            ) : (
+              <div className="w-14 h-14 mx-auto mb-3 rounded-xl bg-white/20 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-70"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              </div>
+            )}
+            <div className="relative z-10 text-center">
+              <h3 className="text-white font-black text-sm leading-tight mb-1 font-arabic">{card2Title}</h3>
+              <p className="text-white/70 text-xs font-medium mb-3">{card2Subtitle}</p>
+              <span className="inline-flex items-center gap-1 bg-white text-gray-900 text-[10px] font-black px-3 py-1.5 rounded-full">
+                اكتشف
+              </span>
+            </div>
+          </Link>
         </div>
       </div>
     </section>
