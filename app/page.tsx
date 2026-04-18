@@ -6,6 +6,7 @@ import { HeroSection } from '@/components/home/HeroSection';
 import { CategoriesSection } from '@/components/home/CategoriesSection';
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
 import { CategoryShowcase } from '@/components/home/CategoryShowcase';
+import { CategorySection } from '@/components/home/CategorySection';
 import { StoreReviews } from '@/components/home/StoreReviews';
 
 export const revalidate = 60; // ISR for 60 seconds
@@ -30,8 +31,13 @@ export default async function HomePage() {
       <main className="flex-1 flex flex-col">
         <HeroSection settings={settings} />
         <CategoriesSection categories={categories} />
-        <FeaturedProducts products={featuredProducts} />
         <CategoryShowcase categories={featuredCategories} />
+        <FeaturedProducts products={featuredProducts} />
+        
+        {featuredCategories?.map((category) => (
+          <CategorySection key={category.id} category={category} />
+        ))}
+        
         <StoreReviews reviews={storeReviews} />
       </main>
     </>

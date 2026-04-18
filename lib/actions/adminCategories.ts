@@ -113,3 +113,23 @@ export async function toggleCategoryHomepage(id: string, show_on_homepage: boole
     return { success: false, error: error.message };
   }
 }
+
+export async function updateCategorySortOrder(id: string, sort_order: number) {
+  try {
+    const supabase = getAdminSupabase();
+    const { error } = await supabase
+      .from('categories')
+      .update({ sort_order })
+      .eq('id', id);
+    if (error) throw error;
+
+    revalidatePath('/');
+    revalidatePath('/shop');
+    revalidatePath('/admin/categories');
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('[adminCategories] updateCategorySortOrder error:', error);
+    return { success: false, error: error.message };
+  }
+}

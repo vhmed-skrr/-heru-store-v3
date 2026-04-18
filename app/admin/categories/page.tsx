@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { getCategories } from '@/lib/data/categories';
 import { DeleteCategoryButton } from '@/components/admin/DeleteCategoryButton';
 import { ToggleHomepageButton } from '@/components/admin/ToggleHomepageButton';
+import { SortOrderInput } from '@/components/admin/SortOrderInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,9 +86,10 @@ export default async function AdminCategoriesPage() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded bg-brand-50 text-brand-600 font-bold text-sm">
-                          {category.sort_order || 0}
-                        </span>
+                        <SortOrderInput 
+                          categoryId={category.id} 
+                          initialOrder={category.sort_order || 0} 
+                        />
                       </td>
                       <td className="p-4">
                         {category.active ? (
