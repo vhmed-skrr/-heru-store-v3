@@ -22,16 +22,23 @@ export async function getCategories(active_only: boolean = true): Promise<{ data
 export async function getFeaturedCategories(): Promise<{ data: Category[] | null; error: string | null }> {
   try {
     const supabase = await createClient();
-    const query = supabase
+    const { data, error } = await supabase
       .from('categories')
       .select('*')
       .eq('active', true)
       .eq('show_on_homepage', true)
       .order('sort_order', { ascending: true });
-    
-    const { data, error } = await query;
+
+    // تشخيص مؤقت — احذفه بعد التأكد
+    console.log('[getFeaturedCategories] count:', data?.length ?? 0, '| error:', error?.message ?? 'none');
+    if (data) {
+      data.forEach(c =>
+        console.log('  → category:', c.name_ar, '| show_on_homepage:', c.show_on_homepage, '| active:', c.active)
+      );
+    }
+
     if (error) throw error;
-    
+
     return { data: data as Category[], error: null };
   } catch (error: Omit<Error, "name"> | unknown) {
     return { data: null, error: error instanceof Error ? error.message : "حدث خطأ أثناء جلب التصنيفات المميزة" };
